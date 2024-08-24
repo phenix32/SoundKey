@@ -1,8 +1,10 @@
-# SoundKey Application for "Loup Garou" Game
+# SoundKey Application for Werewolf Game (Les Loups-garous de Thiercelieux)
 
 ## Overview
 
-The SoundKey Application is a PowerShell script tailored for enhancing the gaming experience, specifically designed to add atmospheric sounds to the "Loup Garou" game. By allowing the game master to trigger sound effects through keyboard inputs, this tool enriches the narrative and interaction during gameplay. it is also ideal for custom soundboards, interactive audio projects, or adding atmosphere to tabletop RPGs as a game master’s tool.
+The SoundKey Application is a PowerShell script tailored for enhancing the gaming experience of "Les Loups-garous de Thiercelieux," a popular social deduction game. By allowing the game master to trigger sound effects through keyboard inputs, this tool enriches the narrative and interaction during gameplay. For more details about the game, visit [Les Loups-garous de Thiercelieux on Wikipedia](https://fr.wikipedia.org/wiki/Les_Loups-garous_de_Thiercelieux).
+
+it is also ideal for custom soundboards, interactive audio projects, or adding atmosphere to tabletop RPGs as a game master’s tool.
 
 ## Features
 
