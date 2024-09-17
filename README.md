@@ -4,7 +4,7 @@
 
 ## Overview
 
-The SoundKey Application is a PowerShell script tailored for enhancing the gaming experience of "Les Loups-garous de Thiercelieux," a popular social deduction game. By allowing the game master to trigger sound effects through keyboard inputs, this tool enriches the narrative and interaction during gameplay. For more details about the game, visit [Les Loups-garous de Thiercelieux on Wikipedia](https://fr.wikipedia.org/wiki/Les_Loups-garous_de_Thiercelieux).
+The SoundKey Application is a PowerShell script tailored for enhancing the gaming experience of "Les Loups-garous de Thiercelieux," a popular social deduction game. By allowing the game master to trigger sound effects through keyboard inputs, this tool enriches the narrative and interaction during gameplay. For more details about the game, visit [SoundKey web site](https://sites.google.com/view/soundkey-atmosphere/home/english).
 
 it is also ideal for custom soundboards, interactive audio projects, or adding atmosphere to tabletop RPGs as a game master’s tool.
 
@@ -86,7 +86,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Vue d'ensemble
 
-L'application SoundKey est un script PowerShell conçu pour améliorer l'expérience de jeu des "Loups-garous de Thiercelieux", un jeu de déduction sociale populaire. En permettant au maître du jeu de déclencher des effets sonores via des entrées clavier, cet outil enrichit la narration et l'interaction pendant le jeu. Pour plus de détails sur le jeu, visitez [Les Loups-garous de Thiercelieux sur Wikipedia](https://fr.wikipedia.org/wiki/Les_Loups-garous_de_Thiercelieux).
+L'application SoundKey est un script PowerShell conçu pour améliorer l'expérience de jeu des "Loups-garous de Thiercelieux", un jeu de déduction sociale populaire. En permettant au maître du jeu de déclencher des effets sonores via des entrées clavier, cet outil enrichit la narration et l'interaction pendant le jeu. Pour plus de détails sur le jeu, visitez [SoundKey le site WEB](https://sites.google.com/view/soundkey-atmosphere/home/francais)
 
 Il est également idéal pour des tableaux de son personnalisés, des projets audio interactifs ou pour ajouter une ambiance aux jeux de rôle sur table en tant qu'outil pour le maître du jeu.
 
