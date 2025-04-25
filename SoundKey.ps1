@@ -11,7 +11,7 @@
     Yves WOLFF
 
 .VERSION
-    1.0
+    1.1
 
 .DATE
     2024-08-23
@@ -392,32 +392,6 @@ function Create-SoundTable {
     }
 }
 
-<#
-	This function displays detailed information about each sound list in the $soundTable.
-	It shows the key associated with each list, the name of the list, the number of sounds, and details about each MediaPlayer object.
-
-	Global Variables Used:
-	- $soundTable: Hashtable containing the sound lists.
-
-	Example of usage:
-	show-detail-SoundList
-#>
-function show-detail-SoundList {
-
-    foreach ($key in $soundTable.Keys) {
-        Write-Host "Key: $key"
-        Write-Host "Sound list name: $($soundTable[$key]['name'])"
-        Write-Host "Number of sounds: $($soundTable[$key]['players'].Count)"
-        Write-Host "Details of MediaPlayer objects:"
-
-        # Display information for each MediaPlayer object associated with the key
-        foreach ($player in $soundTable[$key]['players']) {
-            Write-Host "  - File: $($player.Source)"
-        }
-
-        Write-Host "-----------------------------"
-    }
-}
 
 <#
 	This function displays a summary of the available sound lists stored in the $soundTable.
@@ -445,7 +419,17 @@ function Show-SoundTable {
         }
     }
     
+    # Display the function-specific keys and their actions
+    Write-Host "Special Function Keys:" -ForegroundColor Green
     Write-Host "--------------------------------"
+    Write-Host "  F1: Display the current sound table."
+    Write-Host "  F2: Toggle looping for the currently selected sound."
+    Write-Host "  F3: Toggle stacking (parallel playback) of sounds."
+    Write-Host "  Escape: Stop all playing sounds immediately."
+    Write-Host "  Delete: Stop all sounds and exit the program safely."
+
+    Write-Host "--------------------------------"
+
 }
 
 function Stop-AllSound {
