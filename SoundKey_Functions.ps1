@@ -419,8 +419,8 @@ function Dispose-SoundTable {
 #
 # Global Variables Used:
 # - $soundTable: Retrieves and updates the sound list and its current state.
-# - $loopFlag: Updates the loop state of the current sound list.
-# - $StackFlag: Determines whether to stop the current sound or layer it with a new one.
+# - $global:loopFlag: Updates the loop state of the current sound list.
+# - $global:StackFlag: Determines whether to stop the current sound or layer it with a new one.
 #
 # Returns:
 # - None. The function directly plays or stops sounds based on the conditions.
@@ -449,11 +449,11 @@ function Invoke-keyboard-Player {
 	$name  		   = $soundTable[$keySound]['name']
 	
 	# Update loop and parallel flags based on global variables
-	$soundTable[$keySound]['loop'] = $loopFlag
-	$soundTable[$keySound]['paralleled'] = $StackFlag
+	$soundTable[$keySound]['loop'] = $global:loopFlag
+	$soundTable[$keySound]['paralleled'] = $global:StackFlag
 
 	# Stop the currently playing sound if StackFlag is not set
-	if ($lastIndex -ne -1 -and -not ($StackFlag)  ) {
+	if ($lastIndex -ne -1 -and -not ($global:StackFlag)  ) {
 		$player = $players[$lastIndex]
 		Toggle-Sound -player $player -stop				
 	}
@@ -502,7 +502,7 @@ function Invoke-keyboard-Player {
 			$player = $players[$lastIndex]
 			$player.position = [timespan]::Zero
 			
-			if ($StackFlag) {Toggle-Sound -player $player -play} else {Toggle-Sound -player $player}
+			if ($global:StackFlag) {Toggle-Sound -player $player -play} else {Toggle-Sound -player $player}
 
 			return # Operation completed
 		}		 
@@ -577,7 +577,7 @@ function Toggle-Sound {
 #
 # Global Variables Used:
 # - $soundTable: Retrieves the sound list and its current loop status.
-# - $StackFlag: Determines whether to handle looping sounds in parallel or individually.
+# - $global:StackFlag: Determines whether to handle looping sounds in parallel or individually.
 #
 # Returns:
 # - None. The function directly manages sound playback based on looping conditions.
@@ -598,7 +598,7 @@ function Update-loops {
 		# Check if the sound is at the end and looping is enabled
 		if ($true -eq $loop) {
 
-			if ($StackFlag) {
+			if ($global:StackFlag) {
 
 				# Handle sounds played in parallel
 				for($i=0; $i -lt ($lastindex+1); $i++) {
@@ -625,6 +625,22 @@ function Update-loops {
 		}
 	}
 }
+
+function Stop-AllLoops {
+    <#
+        Arrête toutes les boucles en cours 
+    #>
+
+
+    # Désactiver le flag loop pour chaque entrée du soundTable
+    foreach ($key in $soundTable.Keys) {
+        $soundTable[$key]['loop'] = $false
+    }
+
+
+    Write-Host " All looping sound are played now just one time." -ForegroundColor Yellow
+}
+
 
 # ---------------------------------------------------------------
 # Function: Read-KeyNonBlocking
@@ -670,8 +686,8 @@ function Read-KeyNonBlocking {
 # - None.
 #
 # Global Variables Used:
-# - $loopFlag: Toggles looping on and off with the F2 key.
-# - $StackFlag: Toggles parallel playback on and off with the F3 key.
+# - $global:loopFlag: Toggles looping on and off with the F2 key.
+# - $global:StackFlag: Toggles parallel playback on and off with the F3 key.
 # - $soundTable: Used to identify and play sounds based on key presses.
 #
 # Returns:
@@ -686,67 +702,83 @@ function Start-Listening-Keybaord {
 	
     while ($running) {
         $key = Read-KeyNonBlocking
-        if ($null -ne $key) {
-			$key = $($key | Out-String).trim()
-            Write-Host "Key pressed: [$key]"
-			
-            if ($key -eq 'Delete') {
-                $running = $false
-				Stop-AllSound
-				Write-Host "Program ended"    
-            }
 
-            if ($key -eq 'Escape') {
-				Stop-AllSound
-				Write-Host "All sounds stopped."  
-				continue  
-			}
-			
-            if ($key -eq 'F1') {
-				Clear-host
-				Show-SoundTable -soundTable $soundTable -keys $keys
-				continue
-			}
-				
-			# Toggle looping on/off with F2
-			if ($key -eq 'F2') {
-				$loopFlag = -not ($loopFlag)
-				if ($loopFlag -eq $true) {
-					write-host "Loop active" -ForegroundColor green
-				} else {
-					write-host "Loop stopped" -ForegroundColor red
-				}
+        # manage the key pressed
+        $running = set-key-beavior -key $key -soundTable $soundTable
 
-				continue
-			}
-
-			# Toggle parallel sound playback with F3
-			if ($key -eq 'F3') {
-				$StackFlag = -not ($StackFlag)
-				if ($StackFlag -eq $true) {
-					write-host "Parallel playback active" -ForegroundColor green
-				} else {
-					write-host "Single playback mode" -ForegroundColor red
-				}
-
-				continue
-			}
-			
-
-			# Play/stop a sound
-			if ($soundTable.ContainsKey($key)) {
-				Invoke-keyboard-Player -keySound $key -SequencePlay
-			} else {
-				
-				write-host "No sound found"
-			}
-			
-			
-        }
         # Manage looping sounds every 100ms
         Start-Sleep -Milliseconds 100		
 		Update-loops
 		
     }
     Write-Host "Loop ended."
+}
+
+
+function set-key-beavior {
+    param ([string]$key,
+           [hashtable]$soundTable)
+
+    $running = $true
+    if ($null -ne $key) {
+        $key = $($key | Out-String).trim()
+        Write-Host "Key pressed: [$key]"
+        
+        if ($key -eq 'Delete') {
+            $running = $false
+            Stop-AllSound
+            Write-Host "Program ended" 
+        }
+
+        if ($key -eq 'Escape') {
+            Stop-AllSound
+            Write-Host "All sounds stopped."  
+            return $running
+        }
+        
+        if ($key -eq 'F1') {
+            Clear-host
+            Show-SoundTable -soundTable $soundTable -keys $keys
+            return $running
+        }
+            
+        # Toggle looping on/off with F2
+        if ($key -eq 'F2') {
+            $global:loopFlag = -not ($global:loopFlag)
+            if ($global:loopFlag -eq $true) {
+                write-host "Loop active" -ForegroundColor green
+            } else {
+                write-host "Loop stopped" -ForegroundColor red
+                Stop-AllLoops
+            }
+
+            return $running
+        }
+
+        # Toggle parallel sound playback with F3
+        if ($key -eq 'F3') {
+            $global:StackFlag = -not ($global:StackFlag)
+            if ($global:StackFlag -eq $true) {
+                write-host "Parallel playback active" -ForegroundColor green
+            } else {
+                write-host "Single playback mode" -ForegroundColor red
+            }
+
+            return $running
+        }
+        
+
+        # Play/stop a sound
+        if ($soundTable.ContainsKey($key)) {
+            Invoke-keyboard-Player -keySound $key -SequencePlay
+        } else {
+            
+            write-host "No sound found"
+        }
+        
+        
+    }
+
+    return $running
+
 }

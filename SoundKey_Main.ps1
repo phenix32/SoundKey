@@ -95,10 +95,10 @@ $SortedAudioFiles = @()
 $soundTable = @{}
 
 # $loopFlag: A global boolean variable that determines if the sound should loop. It is toggled by the F2 key.
-$loopFlag = $false
+$global:loopFlag = $false
 
 # $StackFlag: A global boolean variable that determines if multiple sounds should be played in parallel. It is toggled by the F3 key.
-$StackFlag = $false
+$global:StackFlag = $false
 
 # Ordered array of keyboard keys mapped to sound lists; adapts to various keyboard layouts
 $keys = @("D1","D2","D3","D4","D5","D6","D7","D8","D9","D0",
@@ -136,23 +136,25 @@ Show-SoundTable -soundTable $soundTable -keys $keys
 
      $special = @{
         'F1' = @{
-          Action      = { Show-SoundTable -soundTable $soundTable -keys $keys }
+          Action      = { set-key-beavior -key 'F1' -soundTable $soundTable }
           Description = 'Display the current sound table.'
         }
         'F2' = @{
-          Action      = { $global:loopFlag = -not $global:loopFlag }
+          Action      = { set-key-beavior -key 'F2' -soundTable $soundTable }
           Description = 'Toggle looping for the current sound.'
+          Toggle      = $true
         }
         'F3' = @{
-          Action      = { $global:StackFlag = -not $global:StackFlag }
+          Action      = { set-key-beavior -key 'F3' -soundTable $soundTable }
           Description = 'Toggle stacking of sounds.'
+          Toggle      = $true
         }
         'Escape' = @{
-          Action      = { Stop-AllSound }
+          Action      = { set-key-beavior -key 'Escape' -soundTable $soundTable }
           Description = 'Stop all playing sounds immediately.'
         }
         'Delete' = @{
-          Action      = { Stop-AllSound; [System.Windows.Forms.Application]::Exit() }
+          Action      = { set-key-beavior -key 'Delete' -soundTable $soundTable; }
           Description = 'Stop all sounds and exit.'
         }
       }
