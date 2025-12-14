@@ -5,7 +5,8 @@ function Show-SoundKeyUI {
     param(
         [hashtable] $soundTable,
         [string[]]  $keys,
-        [hashtable] $specialFunctions
+        [hashtable] $specialFunctions,
+        [switch]    $Verbose
     )
 
     Add-Type -AssemblyName System.Windows.Forms
@@ -47,7 +48,7 @@ function Show-SoundKeyUI {
         -Margin $margin `
         -ButtonSize $buttonSize `
         -Columns $cols `
-        -GridStartY $gridStartY
+        -GridStartY ([ref]$gridStartY)
 
     # start timer
     Initialize-LoopTimer -ToggleControls $ToggleControls -IntervalMs 100
@@ -62,6 +63,67 @@ function Show-SoundKeyUI {
         elseif ($soundTable.ContainsKey($k)) {
             Invoke-keyboard-Player -keySound $k -SequencePlay
         }
+    })
+
+    # Gestion du redimensionnement de la fenêtre avec délai
+    $global:resizeTimer = $null
+    $form.Add_Resize({
+        if ($global:resizeTimer -ne $null -and $global:resizeTimer.Enabled) {
+            $global:resizeTimer.Stop()
+            $global:resizeTimer.Dispose()
+        }
+
+        $global:resizeTimer = New-Object System.Windows.Forms.Timer
+        $global:resizeTimer.Interval = 300 # Attendre 300ms après la fin du redimensionnement
+        $global:resizeTimer.Add_Tick({
+            if ($global:resizeTimer -ne $null) {
+                Write-Verbose "Redimensionnement terminé, mise à jour de la grille des boutons..."
+
+                $global:resizeTimer.Stop()
+                $global:resizeTimer.Dispose()
+                $global:resizeTimer = $null
+
+                # Recalculer le nombre de colonnes en fonction de la nouvelle taille de la fenêtre
+                $cols = [math]::Floor(( $form.ClientSize.Width - 2 * $margin ) / ( $buttonSize.Width + $margin ))
+
+                # Supprimer tous les anciens boutons avant de redessiner la grille
+				# Suspendre le layout pour éviter les rafraîchissements intermédiaires
+				$form.SuspendLayout()
+
+				# Prendre un snapshot (array) des boutons à supprimer
+				$buttonsToRemove = @(
+				    $form.Controls |
+				        Where-Object { ($_ -is [System.Windows.Forms.Button]) -and ($_.Tag -ne $null) }
+				)
+
+				foreach ($btn in $buttonsToRemove) {
+				    try {
+				        Write-Verbose "Suppression du bouton pour la clé '$($btn.Tag)'"
+				        $form.Controls.Remove($btn)
+				        $btn.Dispose()
+				    } catch {
+				        Write-Verbose "Erreur lors de la suppression d'un bouton : $_"
+				    }
+				}
+
+				# Recréation des boutons en fonction de la nouvelle taille
+				$GridStartY = $margin + $buttonSize.Height + $margin
+				Create-SoundButtonsGrid `
+				    -Form $form `
+				    -SoundTable $soundTable `
+				    -Keys $keys `
+				    -Margin $margin `
+				    -ButtonSize $buttonSize `
+				    -Columns $cols `
+				    -GridStartY ([ref]$GridStartY)
+
+				# Rétablir le layout et forcer le rendu
+				$form.ResumeLayout()
+				$form.PerformLayout()
+				$form.Refresh()
+            }
+        })
+        $global:resizeTimer.Start()
     })
 
     [void]$form.ShowDialog()

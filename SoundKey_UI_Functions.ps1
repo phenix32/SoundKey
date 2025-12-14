@@ -52,13 +52,27 @@ function Create-SpecialFunctionControls {
             $ctrl = New-Object System.Windows.Forms.CheckBox
             $var  = Get-Variable -Name ("${fname}Flag") -Scope Global -ErrorAction SilentlyContinue
             if ($var) { $ctrl.Checked = [bool]$var.Value }
-            $ctrl.Add_Click({ & $spec.Action })
+            $action = $spec.Action
+            $ctrl.Add_Click({
+                if ($action -is [scriptblock]) {
+                    & $action
+                } elseif ($action) {
+                    Invoke-Expression $action
+                }
+            })
             $ToggleControls[$fname] = $ctrl
         }
         else {
             # Simple Button
             $ctrl = New-Object System.Windows.Forms.Button
-            $ctrl.Add_Click({ & $spec.Action })
+            $action = $spec.Action
+            $ctrl.Add_Click({
+                if ($action -is [scriptblock]) {
+                    & $action
+                } elseif ($action) {
+                    Invoke-Expression $action
+                }
+            })
         }
 
         # Propriétés communes
@@ -82,13 +96,22 @@ function Create-SoundButtonsGrid {
         [hashtable]                 $SoundTable,
         [string[]]                  $Keys,
         [int]                       $Margin,
-        [System.Drawing.Size]       $ButtonSize,
-        [int]                       $Columns,
-        [int]                       $GridStartY
+        [ref]                       $GridStartY,
+        [hashtable]                 $ToggleControls
     )
     # Filtre les clés actives (au moins un MediaPlayer)
     $activeKeys = $Keys |
         Where-Object { $SoundTable.ContainsKey($_) -and $SoundTable[$_]['players'].Count -gt 0 }
+
+    # Calculer la taille des boutons en fonction de la taille de la fenêtre
+    $availableWidth = $Form.ClientSize.Width - (2 * $Margin)
+    $availableHeight = $Form.ClientSize.Height - $GridStartY.Value - $Margin
+
+    $columns = [math]::Ceiling([math]::Sqrt($activeKeys.Count))
+    $rows = [math]::Ceiling($activeKeys.Count / $columns)
+
+    $buttonWidth = ($availableWidth - ($columns - 1) * $Margin) / $columns
+    $buttonHeight = ($availableHeight - ($rows - 1) * $Margin) / $rows
 
     for ($i = 0; $i -lt $activeKeys.Count; $i++) {
         $key  = $activeKeys[$i]
@@ -100,17 +123,34 @@ function Create-SoundButtonsGrid {
 
         $btn = New-Object System.Windows.Forms.Button
         $btn.Text      = "$disp`n$name"
-        $btn.Size      = $ButtonSize
+        $btn.Size      = New-Object System.Drawing.Size([math]::Floor($buttonWidth), [math]::Floor($buttonHeight))
         $btn.TextAlign = 'MiddleCenter'
         $btn.Tag       = $key
 
-        $row = [math]::Floor($i / $Columns)
-        $col = $i % $Columns
-        $x   = $Margin + ($ButtonSize.Width  + $Margin) * $col
-        $y   = $GridStartY + ($ButtonSize.Height + $Margin) * $row
+        # Vérifie si une image correspondante existe basée sur "name" (png ou jpg)
+        $imagePathPng = "soundkey-images/$name.png"
+        $imagePathJpg = "soundkey-images/$name.jpg"
+        if (Test-Path $imagePathPng) {
+            $btn.BackgroundImage = [System.Drawing.Image]::FromFile($imagePathPng)
+            $btn.BackgroundImageLayout = 'Stretch'
+             Write-Verbose  "Image ajoutée pour le son '$name' : $imagePathPng"
+        } elseif (Test-Path $imagePathJpg) {
+            $btn.BackgroundImage = [System.Drawing.Image]::FromFile($imagePathJpg)
+            $btn.BackgroundImageLayout = 'Stretch'
+             Write-Verbose  "Image ajoutée pour le son '$name' : $imagePathJpg"
+        } else {
+             Write-Verbose  "Aucune image trouvée pour le son '$name'"
+        }
+
+        $row = [math]::Floor($i / $columns)
+        $col = $i % $columns
+        $x   = $Margin + ($buttonWidth  + $Margin) * $col
+        $y   = $GridStartY.Value + ($buttonHeight + $Margin) * $row
 
         $btn.Location = New-Object System.Drawing.Point -ArgumentList $x, $y
         $btn.Add_Click({ param($s,$e) Invoke-keyboard-Player -keySound $s.Tag -SequencePlay })
         $Form.Controls.Add($btn)
+
+        
     }
 }
