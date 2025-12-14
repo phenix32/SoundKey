@@ -129,7 +129,7 @@ Clear-Host
 # Display the sound table and available key mappings.
 Show-SoundTable -soundTable $soundTable -keys $keys
 
-##### Main loop #####
+##### Main #####
 #
         # Start listening to keyboard input and play corresponding sounds.
      #   Start-Listening-Keybaord
