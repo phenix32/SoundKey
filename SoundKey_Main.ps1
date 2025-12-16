@@ -132,30 +132,30 @@ Show-SoundTable -soundTable $soundTable -keys $keys
 ##### Main #####
 #
         # Start listening to keyboard input and play corresponding sounds.
-     #   Start-Listening-Keybaord
+     #   Start-Listening-Keyboard
 
      $special = @{
         'F1' = @{
           Action      = { set-key-beavior -key 'F1' -soundTable $soundTable }
-          Description = 'Display the current sound table.'
+          Description = 'Affiche la liste des sons.'
         }
         'F2' = @{
           Action      = { set-key-beavior -key 'F2' -soundTable $soundTable }
-          Description = 'Toggle looping for the current sound.'
+          Description = 'Sons en boucles.'
           Toggle      = $true
         }
         'F3' = @{
           Action      = { set-key-beavior -key 'F3' -soundTable $soundTable }
-          Description = 'Toggle stacking of sounds.'
+          Description = 'Sons en meme temps.'
           Toggle      = $true
         }
         'Escape' = @{
           Action      = { set-key-beavior -key 'Escape' -soundTable $soundTable }
-          Description = 'Stop all playing sounds immediately.'
+          Description = 'Stoppe tous les sons.'
         }
         'Delete' = @{
           Action      = { set-key-beavior -key 'Delete' -soundTable $soundTable; }
-          Description = 'Stop all sounds and exit.'
+          Description = 'Fermer SoundKey.'
         }
       }
     

@@ -52,26 +52,32 @@ function Create-SpecialFunctionControls {
             $ctrl = New-Object System.Windows.Forms.CheckBox
             $var  = Get-Variable -Name ("${fname}Flag") -Scope Global -ErrorAction SilentlyContinue
             if ($var) { $ctrl.Checked = [bool]$var.Value }
-            $action = $spec.Action
+        
+            $ctrl.Tag = $fname
             $ctrl.Add_Click({
-                if ($action -is [scriptblock]) {
-                    & $action
-                } elseif ($action) {
-                    Invoke-Expression $action
+                param($s,$e)
+        
+                Write-verbose "Toggle Control '$($s.Tag)'"
+                if ($specialFunctions.ContainsKey($s.Tag)) {
+                    & $specialFunctions[$s.Tag].Action
                 }
+
             })
             $ToggleControls[$fname] = $ctrl
         }
         else {
             # Simple Button
             $ctrl = New-Object System.Windows.Forms.Button
-            $action = $spec.Action
+        
+            $ctrl.Tag = $fname
             $ctrl.Add_Click({
-                if ($action -is [scriptblock]) {
-                    & $action
-                } elseif ($action) {
-                    Invoke-Expression $action
+                param($s,$e)
+            
+                Write-verbose "Toggle Control '$($s.Tag)'"
+                if ($specialFunctions.ContainsKey($s.Tag)) {
+                    & $specialFunctions[$s.Tag].Action
                 }
+
             })
         }
 

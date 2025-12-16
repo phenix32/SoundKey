@@ -696,7 +696,7 @@ function Read-KeyNonBlocking {
 # Example usage:
 # Start-Listening-Keyboard
 # This function starts listening for key presses and handles sound playback accordingly.
-function Start-Listening-Keybaord {
+function Start-Listening-Keyboard {
     Write-Host "Press a key to play a sound"
     $running = $true
 	
