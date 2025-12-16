@@ -60,8 +60,11 @@ param (
 # Load the Windows Presentation Foundation (WPF) assembly required for MediaPlayer
 Add-Type -AssemblyName PresentationCore
 
+
 # include
 . .\SoundKey_Functions.ps1
+# Charge les helpers UI (fonctions)
+. .\SoundKey_UI_Functions.ps1
 # Load the UI from SoundKey_UI.ps1
 . .\SoundKey_UI.ps1
 
@@ -154,7 +157,7 @@ Show-SoundTable -soundTable $soundTable -keys $keys
           Description = 'Stoppe tous les sons.'
         }
         'Delete' = @{
-          Action      = { set-key-beavior -key 'Delete' -soundTable $soundTable; }
+          Action      = { set-key-beavior -key 'Delete' -soundTable $soundTable;  Exit-SoundKeyUI }
           Description = 'Fermer SoundKey.'
         }
       }

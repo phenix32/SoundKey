@@ -12,12 +12,12 @@ function Show-SoundKeyUI {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
 
-    # Création du Form
-    $form = New-Object System.Windows.Forms.Form
-    $form.Text          = "SoundKey Interface"
-    $form.Size          = New-Object System.Drawing.Size(800,600)
-    $form.StartPosition = "CenterScreen"
-    $form.KeyPreview    = $true
+    # Création du Form (déclaré globalement)
+    $global:Form = New-Object System.Windows.Forms.Form
+    $global:Form.Text          = "SoundKey Interface"
+    $global:Form.Size          = New-Object System.Drawing.Size(800,600)
+    $global:Form.StartPosition = "CenterScreen"
+    $global:Form.KeyPreview    = $true
 
     # Prépare la synchro des toggles
     $toggleControls = @{}
@@ -28,12 +28,12 @@ function Show-SoundKeyUI {
     # Paramètres de layout
     $margin     = 10
     $buttonSize = New-Object System.Drawing.Size(100,60)
-    $cols       = [math]::Floor(( $form.ClientSize.Width - 2 * $margin ) / ( $buttonSize.Width + $margin ))
+    $cols       = [math]::Floor(( $global:Form.ClientSize.Width - 2 * $margin ) / ( $buttonSize.Width + $margin ))
     $gridStartY = $margin
 
     # Ajoute les controls “Special Functions” en haut
     Create-SpecialFunctionControls `
-        -Form $form `
+        -Form $global:Form `
         -SpecialFunctions $specialFunctions `
         -Margin $margin `
         -ButtonSize $buttonSize `
@@ -42,7 +42,7 @@ function Show-SoundKeyUI {
 
     # Crée la grille de boutons métiers
     Create-SoundButtonsGrid `
-        -Form $form `
+        -Form $global:Form `
         -SoundTable $soundTable `
         -Keys $keys `
         -Margin $margin `
@@ -54,7 +54,7 @@ function Show-SoundKeyUI {
     Initialize-LoopTimer -ToggleControls $ToggleControls -IntervalMs 100
 
     # Gestion des frappes clavier
-    $form.Add_KeyDown({
+    $global:Form.Add_KeyDown({
         param($s,$e)
         $k = $e.KeyCode.ToString()
         if ($specialFunctions.ContainsKey($k)) {
@@ -67,7 +67,7 @@ function Show-SoundKeyUI {
 
     # Gestion du redimensionnement de la fenêtre avec délai
     $global:resizeTimer = $null
-    $form.Add_Resize({
+    $global:Form.Add_Resize({
         if ($global:resizeTimer -ne $null -and $global:resizeTimer.Enabled) {
             $global:resizeTimer.Stop()
             $global:resizeTimer.Dispose()
@@ -93,7 +93,7 @@ function Show-SoundKeyUI {
 				# Prendre un snapshot (array) des boutons à supprimer
 				$buttonsToRemove = @(
 				    $form.Controls |
-				        Where-Object { ($_ -is [System.Windows.Forms.Button]) -and ($_.Tag -ne $null) }
+                        Where-Object { ($_ -is [System.Windows.Forms.Button]) -and ($null -ne $_.Tag) -and ($_.Tag -notin @('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','Escape','Delete')) }
 				)
 
 				foreach ($btn in $buttonsToRemove) {
@@ -126,5 +126,5 @@ function Show-SoundKeyUI {
         $global:resizeTimer.Start()
     })
 
-    [void]$form.ShowDialog()
+    [void]$global:Form.ShowDialog()
 }

@@ -32,6 +32,16 @@ function Initialize-LoopTimer {
     return $timer
 }
 
+    # Ferme la fenêtre principale SoundKey si elle est active
+function Exit-SoundKeyUI {
+    Write-Host "Fermeture de l'interface SoundKey..."
+    Write-Host "form : $($global:Form) viible : $($global:Form.Visible)"
+    if ($global:Form -and $global:Form.Visible) {
+
+        $global:Form.Close()
+    }
+}
+
 function Create-SpecialFunctionControls {
     param(
         [System.Windows.Forms.Form] $Form,
@@ -94,6 +104,8 @@ function Create-SpecialFunctionControls {
 
     # On décale le grid des boutons métier
     $GridStartY.Value += $ButtonSize.Height + $Margin
+
+
 }
 
 function Create-SoundButtonsGrid {
