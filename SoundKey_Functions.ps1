@@ -456,6 +456,13 @@ function Invoke-keyboard-Player {
 	if ($lastIndex -ne -1 -and -not ($global:StackFlag)  ) {
 		$player = $players[$lastIndex]
 		Toggle-Sound -player $player -stop				
+        # Si aucune autre action n'est demandée, masquer l'affichage de progression
+        if (-not $unikPlay -and -not $SequencePlay) {
+            $soundTable[$keySound]['lastSound'] = -1
+            if (Get-Command -Name Update-SoundProgressDisplay -ErrorAction SilentlyContinue) {
+                Update-SoundProgressDisplay -Form $global:Form -Key $keySound -CurrentIndex -1 -TotalCount $countSound
+            }
+        }
 	}
 
 	# Play a specific sound if unikPlay is set
@@ -467,6 +474,10 @@ function Invoke-keyboard-Player {
 			
 			Write-Host "Playing sound: $name number [$wantedSound]"
 			Toggle-Sound -player $player
+            # Mettre à jour l'affichage de progression pour ce son
+            if (Get-Command -Name Update-SoundProgressDisplay -ErrorAction SilentlyContinue) {
+                Update-SoundProgressDisplay -Form $global:Form -Key $keySound -CurrentIndex $wantedSound -TotalCount $countSound
+            }
 			
 		} 
 		return # Operation completed
@@ -480,10 +491,14 @@ function Invoke-keyboard-Player {
 		
 			Write-Host "Sound list: ($name) completed" -ForegroundColor Cyan
 	
-			# Reset index and do not play new sounds
-			$soundTable[$keySound]['lastSound'] = -1
+            # Reset index and do not play new sounds
+            $soundTable[$keySound]['lastSound'] = -1
+            # Masquer l'affichage de progression
+            if (Get-Command -Name Update-SoundProgressDisplay -ErrorAction SilentlyContinue) {
+                Update-SoundProgressDisplay -Form $global:Form -Key $keySound -CurrentIndex -1 -TotalCount $countSound
+            }
 
-			return # Operation completed
+            return # Operation completed
 		
 		} else {			
 		
@@ -502,9 +517,13 @@ function Invoke-keyboard-Player {
 			$player = $players[$lastIndex]
 			$player.position = [timespan]::Zero
 			
-			if ($global:StackFlag) {Toggle-Sound -player $player -play} else {Toggle-Sound -player $player}
+            if ($global:StackFlag) {Toggle-Sound -player $player -play} else {Toggle-Sound -player $player}
+            # Mettre à jour l'affichage de progression
+            if (Get-Command -Name Update-SoundProgressDisplay -ErrorAction SilentlyContinue) {
+                Update-SoundProgressDisplay -Form $global:Form -Key $keySound -CurrentIndex $lastIndex -TotalCount $countSound
+            }
 
-			return # Operation completed
+            return # Operation completed
 		}		 
 
 	}

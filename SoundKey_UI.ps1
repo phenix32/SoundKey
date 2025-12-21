@@ -59,6 +59,11 @@ function Show-SoundKeyUI {
         $k = $e.KeyCode.ToString()
         if ($specialFunctions.ContainsKey($k)) {
             & $specialFunctions[$k].Action
+            if ($k -eq 'Escape') {
+                if (Get-Command -Name Hide-AllSoundProgressLabels -ErrorAction SilentlyContinue) {
+                    Hide-AllSoundProgressLabels -Form $global:Form
+                }
+            }
         }
         elseif ($soundTable.ContainsKey($k)) {
             Invoke-keyboard-Player -keySound $k -SequencePlay
@@ -90,19 +95,26 @@ function Show-SoundKeyUI {
 				# Suspendre le layout pour éviter les rafraîchissements intermédiaires
 				$form.SuspendLayout()
 
-				# Prendre un snapshot (array) des boutons à supprimer
-				$buttonsToRemove = @(
+				# Prendre un snapshot (array) des boutons et labels à supprimer
+				$controlsToRemove = @(
 				    $form.Controls |
-                        Where-Object { ($_ -is [System.Windows.Forms.Button]) -and ($null -ne $_.Tag) -and ($_.Tag -notin @('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','Escape','Delete')) }
+                        Where-Object { 
+                            (($_ -is [System.Windows.Forms.Button]) -and ($null -ne $_.Tag) -and ($_.Tag -notin @('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','Escape','Delete'))) -or
+                            ($_ -is [System.Windows.Forms.Label] -and ($_.Tag -eq "KeyLabel" -or $_.Tag -like "SoundProgress:*"))
+                        }
 				)
 
-				foreach ($btn in $buttonsToRemove) {
+				foreach ($ctrl in $controlsToRemove) {
 				    try {
-				        Write-Verbose "Suppression du bouton pour la clé '$($btn.Tag)'"
-				        $form.Controls.Remove($btn)
-				        $btn.Dispose()
+				        if ($ctrl -is [System.Windows.Forms.Button]) {
+				            Write-Verbose "Suppression du bouton pour la clé '$($ctrl.Tag)'"
+				        } else {
+				            Write-Verbose "Suppression d'un label : $($ctrl.Tag)"
+				        }
+				        $form.Controls.Remove($ctrl)
+				        $ctrl.Dispose()
 				    } catch {
-				        Write-Verbose "Erreur lors de la suppression d'un bouton : $_"
+				        Write-Verbose "Erreur lors de la suppression d'un contrôle : $_"
 				    }
 				}
 
